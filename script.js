@@ -13,14 +13,29 @@ document.addEventListener("keydown", (e) => {
     if (e.key === "ArrowLeft" && carLeft > 0) {
         carLeft -= 25;
     }
-    if (e.key === "ArrowRight" && carLeft < 250) {
+    if (e.key === "ArrowRight" && carLeft < 240) {
         carLeft += 25;
     }
     car.style.left = carLeft + "px";
 });
 
+// REAL collision detection (bounding box)
+function isColliding(a, b) {
+    const aRect = a.getBoundingClientRect();
+    const bRect = b.getBoundingClientRect();
+
+    return !(
+        aRect.bottom < bRect.top ||
+        aRect.top > bRect.bottom ||
+        aRect.right < bRect.left ||
+        aRect.left > bRect.right
+    );
+}
+
 // Create obstacle
 function createObstacle() {
+    if (gameOver) return;
+
     const obstacle = document.createElement("div");
     obstacle.classList.add("obstacle");
     obstacle.style.left = Math.floor(Math.random() * 6) * 50 + "px";
@@ -29,18 +44,18 @@ function createObstacle() {
     let obstacleTop = -100;
 
     const moveObstacle = setInterval(() => {
-        if (gameOver) return;
+        if (gameOver) {
+            clearInterval(moveObstacle);
+            return;
+        }
 
         obstacleTop += 5;
         obstacle.style.top = obstacleTop + "px";
 
-        // Collision detection
-        if (
-            obstacleTop > 380 &&
-            obstacleTop < 460 &&
-            parseInt(obstacle.style.left) === carLeft
-        ) {
+        // ✅ Correct collision check
+        if (isColliding(car, obstacle)) {
             endGame();
+            clearInterval(moveObstacle);
         }
 
         if (obstacleTop > 500) {
@@ -51,7 +66,7 @@ function createObstacle() {
 }
 
 // Score counter
-setInterval(() => {
+const scoreInterval = setInterval(() => {
     if (!gameOver) {
         score++;
         scoreDisplay.innerText = "Score: " + score;
@@ -59,10 +74,14 @@ setInterval(() => {
 }, 500);
 
 // Obstacle generation
-setInterval(createObstacle, 1500);
+const obstacleInterval = setInterval(createObstacle, 1500);
 
 function endGame() {
+    if (gameOver) return;
+
     gameOver = true;
+    clearInterval(scoreInterval);
+    clearInterval(obstacleInterval);
     alert("Game Over! Your score: " + score);
 }
 

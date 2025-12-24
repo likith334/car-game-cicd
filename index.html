@@ -11,8 +11,18 @@
 <p>Use ⬅️ ➡️ arrow keys to move</p>
 
 <div id="gameArea">
+  <div class="grass left"></div>
+  <div class="grass right"></div>
+
+  <div class="road">
+    <div class="lane lane-left"></div>
+    <div class="lane lane-right"></div>
     <div id="car"></div>
+  </div>
 </div>
+
+<div id="hud">Score: <span id="score">0</span></div>
+
 
 <div id="score">Score: 0</div>
 <button onclick="restartGame()">Restart</button>
